@@ -77,17 +77,15 @@ object ScriptEstimatorV2 {
     val (f, localCtx) = localFuncCtx
     for {
       _ <- modify[EstimatorContext, ExecutionError](userFuncs.set(_)(localCtx.userFuncs))
-      r <- for {
+          argsComplexity <- args.traverse(evalExpr).map(_.sum)
           _ <- modify[EstimatorContext, ExecutionError](lets.modify(_)(s => {
             val stringToTuple = s ++ localCtx.letDefs
             println(stringToTuple)
             stringToTuple
           }))
-          argsComplexity <- args.traverse(evalExpr).map(_.sum)
           r <- evalExpr(f.body).map(_ + f.args.size * 5)
-        } yield r + argsComplexity
       _ <- modify[EstimatorContext, ExecutionError](userFuncs.set(_)(baseCtx.userFuncs))
-    } yield r
+    } yield r + argsComplexity
   }
 
   private def intersect(
