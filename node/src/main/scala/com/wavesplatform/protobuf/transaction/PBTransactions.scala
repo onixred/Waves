@@ -35,8 +35,8 @@ object PBTransactions {
 
   def vanilla(
     signedTx:  PBSignedTransaction,
-    unsafe:    Boolean = false,
-    estimator: ScriptEstimator
+    estimator: ScriptEstimator,
+    unsafe:    Boolean = false
   ): Either[ValidationError, VanillaTransaction] = {
     for {
       parsedTx <- signedTx.transaction.toRight(GenericError("Transaction must be specified"))

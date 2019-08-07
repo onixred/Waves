@@ -9,8 +9,8 @@ import com.wavesplatform.lang.v2.estimator.ScriptEstimatorV2
 
 object EstimatorProvider {
   implicit class EstimatorBlockchainExt(b: Blockchain) {
-    def estimator(): ScriptEstimator =
-      if (b.isFeatureActivated(NewScriptEstimator)) ScriptEstimatorV2.apply
+    def estimator(height: Int = b.height): ScriptEstimator =
+      if (b.isFeatureActivated(NewScriptEstimator, height)) ScriptEstimatorV2.apply
       else ScriptEstimatorV1.apply
   }
 }

@@ -29,7 +29,7 @@ object PBBlocks {
 
     for {
       header       <- block.header.toRight(GenericError("No block header"))
-      transactions <- block.transactions.map(PBTransactions.vanilla(_, unsafe, estimator)).toVector.sequence
+      transactions <- block.transactions.map(PBTransactions.vanilla(_, estimator, unsafe)).toVector.sequence
       result = create(
         header.version,
         header.timestamp,

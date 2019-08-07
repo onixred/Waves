@@ -5,6 +5,7 @@ import com.wavesplatform.account.{Address, PrivateKey, PublicKey}
 import com.wavesplatform.common.state.ByteStr
 import com.wavesplatform.common.utils._
 import com.wavesplatform.consensus.nxt.NxtLikeConsensusBlockData
+import com.wavesplatform.lang.ScriptEstimator
 import com.wavesplatform.protobuf.block.{PBBlock, PBBlocks, VanillaBlock}
 import com.wavesplatform.protobuf.transaction._
 import com.wavesplatform.transaction.Proofs
@@ -17,18 +18,19 @@ trait PBImplicitConversions {
   }
 
   implicit class PBSignedTransactionConversions(tx: PBSignedTransaction) {
-    def toVanilla = PBTransactions.vanilla(tx).explicitGet()
+    def toVanilla(estimator: ScriptEstimator) =
+      PBTransactions.vanilla(tx, estimator).explicitGet()
   }
 
   implicit class PBTransactionConversions(tx: PBTransaction) {
-    def toVanilla = PBSignedTransaction(Some(tx)).toVanilla
+    def toVanilla(estimator: ScriptEstimator) = PBSignedTransaction(Some(tx)).toVanilla(estimator)
     def sender    = PublicKey(tx.senderPublicKey.toByteArray)
 
-    def signed(signer: PrivateKey): PBSignedTransaction = {
+    def signed(signer: PrivateKey, estimator: ScriptEstimator): PBSignedTransaction = {
       import com.wavesplatform.common.utils._
       PBSignedTransaction(
         Some(tx),
-        Proofs.create(Seq(ByteStr(crypto.sign(signer, toVanilla.bodyBytes())))).explicitGet().map(bs => ByteString.copyFrom(bs.arr)))
+        Proofs.create(Seq(ByteStr(crypto.sign(signer, toVanilla(estimator).bodyBytes())))).explicitGet().map(bs => ByteString.copyFrom(bs.arr)))
     }
   }
 

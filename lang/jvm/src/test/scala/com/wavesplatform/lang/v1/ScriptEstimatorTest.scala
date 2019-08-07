@@ -175,13 +175,17 @@ class ScriptEstimatorTest(estimator: ScriptEstimator)
   }
 
   property("context leak") {
-    val script = s"""
-                    |  func inc(xxx: Int) = xxx + 1
-                    |  let xxx = 5
-                    |  inc(xxx)
-                  """.stripMargin
+    def script(ref: String) = {
+      val script =
+        s"""
+           |  func inc($ref: Int) = $ref + 1
+           |  let xxx = 5
+           |  inc(xxx)
+         """.stripMargin
+      compile(script)
+    }
+    val costs = functionCosts(V3)
 
-    val expr = compile(script)
-    estimate(functionCosts(V3), expr).explicitGet() shouldBe 23
+    estimate(costs, script("xxx")) shouldBe estimate(costs, script("y"))
   }
 }

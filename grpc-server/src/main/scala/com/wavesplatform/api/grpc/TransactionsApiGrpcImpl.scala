@@ -1,6 +1,7 @@
 package com.wavesplatform.api.grpc
 import com.wavesplatform.account.PublicKey
 import com.wavesplatform.api.common.CommonTransactionsApi
+import com.wavesplatform.features.EstimatorProvider._
 import com.wavesplatform.lang.ValidationError
 import com.wavesplatform.network.UtxPoolSynchronizer
 import com.wavesplatform.protobuf.transaction.{InvokeScriptResult, PBSignedTransaction, PBTransaction, VanillaTransaction}
@@ -74,7 +75,7 @@ class TransactionsApiGrpcImpl(wallet: Wallet,
       for {
         sender <- wallet.findPrivateKey(tx.sender.toString)
         signer <- if (tx.sender.toString == signerAddress) Right(sender) else wallet.findPrivateKey(signerAddress)
-        tx     <- Try(tx.signed(signer.privateKey)).toEither.left.map(GenericError(_))
+        tx     <- Try(tx.signed(signer.privateKey, blockchain.estimator())).toEither.left.map(GenericError(_))
       } yield tx
 
     val signerAddress: PublicKey = if (request.signerPublicKey.isEmpty) request.getTransaction.sender else request.signerPublicKey.toPublicKey
@@ -83,7 +84,7 @@ class TransactionsApiGrpcImpl(wallet: Wallet,
 
   override def broadcast(tx: PBSignedTransaction): Future[PBSignedTransaction] = {
     commonApi
-      .broadcastTransaction(tx.toVanilla, forceBroadcast)
+      .broadcastTransaction(tx.toVanilla(blockchain.estimator()), forceBroadcast)
       .map(_.resultE.map(_ => tx).explicitGetErr())
   }
 
