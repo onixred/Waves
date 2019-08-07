@@ -88,12 +88,6 @@ object ScriptEstimatorV2 {
     } yield r + argsComplexity
   }
 
-  private def intersect(
-    source: Map[String, (Boolean, EvalM[Long])],
-    target: Map[String, (Boolean, EvalM[Long])]
-  ): Map[String, (Boolean, EvalM[Long])] =
-    source.foldLeft(target) { case (s, (k, v)) => s.updated(k, s.getOrElse(k, v)) }
-
   private def const(l: Long): EvalM[Long] = Monad[EvalM].pure(l)
 
   private def evalExpr(t: EXPR): EvalM[Long] =
