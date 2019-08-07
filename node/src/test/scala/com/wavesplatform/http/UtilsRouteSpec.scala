@@ -220,7 +220,7 @@ class UtilsRouteSpec extends RouteSpec("/utils") with RestAPISettingsHelper with
           | let a = 5
           | inc(a) == a + 1
         """.stripMargin
-      val compiled = ScriptCompiler.compile(expectedScript, ScriptEstimatorV2.apply)
+      val compiled = ScriptCompiler.compile(expectedScript, ScriptEstimatorV1.apply)
 
       val json         = responseAs[JsValue]
       val base64Result = Script.fromBase64String((json \ "script").as[String], ScriptEstimatorV1.apply)
