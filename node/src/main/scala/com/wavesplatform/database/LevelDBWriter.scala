@@ -903,7 +903,7 @@ class LevelDBWriter(private[database] val writableDB: DB,
     for {
       (header, _) <- db.get(headerKey)
       txs = (0 until header.transactionCount).toList.flatMap { n =>
-        db.get(Keys.transactionAt(height, TxNum(n.toShort), this.estimator()))
+        db.get(Keys.transactionAt(height, TxNum(n.toShort), this.estimator(height)))
       }
       block <- Block.fromHeaderAndTransactions(header, txs).toOption
     } yield block
