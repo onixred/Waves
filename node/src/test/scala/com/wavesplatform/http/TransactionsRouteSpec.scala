@@ -2,7 +2,7 @@ package com.wavesplatform.http
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Route
-import com.wavesplatform.account.{Address, PublicKey}
+import com.wavesplatform.account.PublicKey
 import com.wavesplatform.api.http.ApiError.{InvalidAddress, InvalidSignature, TooBigArrayAllocation}
 import com.wavesplatform.api.http.TransactionsApiRoute
 import com.wavesplatform.common.state.ByteStr
@@ -18,8 +18,6 @@ import com.wavesplatform.network.UtxPoolSynchronizer
 import com.wavesplatform.settings.{BlockchainSettings, GenesisSettings, TestFunctionalitySettings, WalletSettings}
 import com.wavesplatform.state.{AssetDescription, Blockchain}
 import com.wavesplatform.transaction.Asset.IssuedAsset
-import com.wavesplatform.transaction.TransactionParser
-import com.wavesplatform.utils.CloseableIterator
 import com.wavesplatform.utx.UtxPool
 import com.wavesplatform.wallet.Wallet
 import com.wavesplatform.{BlockGen, NoShrink, TestTime, TransactionGen}
@@ -120,7 +118,7 @@ class TransactionsRouteSpec
 
     "transfer with Asset fee" - {
       "without sponsorship" in {
-        val assetId: ByteStr = issueGen.sample.get.assetId()
+        val assetId: ByteStr = issueGen.sample.get.assetId
         val sender: PublicKey = accountGen.sample.get
         val transferTx = Json.obj(
           "type"            -> 4,
@@ -150,7 +148,7 @@ class TransactionsRouteSpec
       }
 
       "with sponsorship" in {
-        val assetId: IssuedAsset = IssuedAsset(issueGen.sample.get.assetId())
+        val assetId: IssuedAsset = IssuedAsset(issueGen.sample.get.assetId)
         val sender: PublicKey = accountGen.sample.get
         val transferTx = Json.obj(
           "type"            -> 4,
@@ -193,7 +191,7 @@ class TransactionsRouteSpec
       }
 
       "with sponsorship, smart token and smart account" in {
-        val assetId: IssuedAsset = IssuedAsset(issueGen.sample.get.assetId())
+        val assetId: IssuedAsset = IssuedAsset(issueGen.sample.get.assetId)
         val sender: PublicKey = accountGen.sample.get
         val transferTx = Json.obj(
           "type"            -> 4,
@@ -273,10 +271,6 @@ class TransactionsRouteSpec
       def routeGen: Gen[Route] =
         Gen.const({
           val b = mock[Blockchain]
-          (b.addressTransactions(_: Address, _: Set[TransactionParser], _: Option[ByteStr]))
-            .expects(*, *, *)
-            .returning(CloseableIterator.empty)
-            .anyNumberOfTimes()
           TransactionsApiRoute(restAPISettings, wallet, b, utx, utxPoolSynchronizer, new TestTime).route
         })
 
